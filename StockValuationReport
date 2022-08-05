@@ -1,0 +1,30 @@
+CREATE PROCEDURE [dbo].[StockValuationReport]
+	
+AS
+BEGIN
+
+ SET NOCOUNT ON;
+
+        select ProductID, Code, Description, Nominal, MaterialGroup, MaterialType, sum(BalanceQuantity) as BalanceQuantity, 
+                UnitType, sum(BalanceValue) as TotalValue, MAX(LastReceiptDate) as LastReceiptDate, ReportCreated
+            into #ReportResults
+            from [Gardners].[dbo].[StockValue_thardata] 
+
+			where convert(date,ReportCreated) = convert(date,DATEADD(DD,-1,getdate()))
+            
+            group by ProductID, Code, Description, Nominal, MaterialGroup, MaterialType,
+                UnitType, ReportCreated
+
+            alter table #ReportResults
+            add [BaseValue] float
+
+            update #ReportResults set BaseValue = TotalValue / BalanceQuantity
+
+            select Code, Description, Nominal, MaterialGroup, MaterialType, BalanceQuantity, UnitType, 
+                BaseValue, TotalValue, LastReceiptDate, ReportCreated
+            from #ReportResults
+            order by code
+            drop table #ReportResults
+        
+        END
+GO
