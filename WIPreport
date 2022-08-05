@@ -1,0 +1,17 @@
+CREATE PROCEDURE [dbo].[WIPReport]
+	
+AS
+BEGIN	
+    SET NOCOUNT ON;
+
+                select [JobNo], [InvoiceID], [EstimateNo], [InvoiceCustomerName], [QuantityOrdered], [QuantityProduced], 
+                    [QuantityDelivered], [PriceQuoted], [MaterialWIP], [LabourWIP], [OutworkCarriageWIP], [SalesLead], [Team],
+                    [KeyAccount], [Estimator], [JobDesc], [ProductType], [JobDate], [JobCreated], [RequiredDate], [ReportCreated],
+                    [EstPrintMatCost], [EstOtherMatCost], [EstOutworkCost], [EstCarriageCost], [EstPrintingLabCost], 
+                    [EstPrintingOHCost], [TotalEstPrintingCost], [EstFinishingLabCost], [EstFinishingOHCost], [TotalEstFinishingCost]
+                from [Gardners].[dbo].[WIP_thardata] 
+
+				where convert(date,ReportCreated) = convert(date,DATEADD(DD,-1,getdate()))
+            
+            END
+GO
