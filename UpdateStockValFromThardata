@@ -1,0 +1,110 @@
+CREATE PROCEDURE [dbo].[UpdateStockValueFromTharstern]
+	
+AS
+BEGIN
+
+ SET NOCOUNT ON;
+                    
+                
+                select tf.ProductID, 
+                        tf.ID as TFID,
+                        p.Code, 
+                        p.Description, 
+                        p.PNominal as Nominal, 
+                        p.dbGroup as MaterialGroup, 
+                        P.StkRef1 as MaterialType, 
+                        tf.Balance as BalanceQuantity,
+                        p.UnitPrice as EstimatePrice,
+                        p.SupplierCode,
+                        p.StkRef1,
+                        tf.UnitPrice as PurchasePrice,
+                        tf.UnitsForDisplay as PurchaseUnits,
+                        p.WidthMM /1000 as WidthM,
+                        (select MAX(ph.TransDate) from thardata.dbo.ProductHistory as ph
+                            where ph.GoodsReceivedLineID <> 0
+                            and p.ID = ph.ProductID
+                            ) as LastReceiptDate,
+                        GetDate() as ReportCreated
+                    into #StockValuationResults
+                    from thardata.dbo.TransactionFile tf
+                    join thardata.dbo.Product as p on tf.ProductID = p.ID
+                    where tf.Balance > 0
+                    and tf.type in(3,1,9)
+
+                    /*
+                    tf.Type
+                    1 = Adjust +
+                    2 = Adjust -
+                    3 = Receipt
+                    4 = Issue
+                    5 = Purchase Order
+                    6 = Sales Order
+                    7 = Allocate
+                    8 = Un-Allocate
+                    9 = Return
+                    10 = Produced
+                    11 = Purchase Order Cancelled
+                    12 – Wip
+                    13 = Overs
+                    14 = Sales Order Cancelled
+                    15 = BOM Assembly
+                    16 = BOM Allocation
+                    */
+
+                    alter table #StockValuationResults
+                    add [UnitDivide] int,
+                        [UnitType] varchar(32),
+                        [UnitPrice] float,
+                        [BalanceValue] float
+                    
+                    --all interway and innotech woven plus s19803 need to be priced at the estimated price of stock code so that it includes freight costs
+                    update #StockValuationResults set PurchasePrice = case 
+                        when Code in('S19803') then EstimatePrice
+                        when SupplierCode in('INNOTECH','INTERWAY','INTERNAL') and StkRef1 in('Woven PE') then EstimatePrice
+                        else PurchasePrice
+                        end
+
+                    update #StockValuationResults set UnitDivide = case 
+                        when PurchaseUnits in('/1','/KG','/LT','/SQM','EACH','ONE OFF') then 1
+                        when PurchaseUnits in('/100','/100 SQM') then 100
+                        when PurchaseUnits in('/1000','/TONNE') then 1000
+                        else UnitDivide
+                        end 
+                    
+                     update #StockValuationResults set UnitType = case 
+                        when PurchaseUnits in('/1','/100','/1000','/TONNE','EACH','ONE OFF') then '/1'
+                        when PurchaseUnits in('/100 SQM','/SQM') then '/SQM'
+                        when PurchaseUnits in('/KG') then '/KG'
+                        when PurchaseUnits in('/LT') then '/LT'
+                        else UnitType
+                        end
+
+                    --only multiply WidthM if UnitType is /SQM 
+                    update #StockValuationResults set UnitPrice = case
+                        when UnitType in('/SQM') then PurchasePrice * WidthM / UnitDivide
+                        when UnitType not in('/SQM') then PurchasePrice / UnitDivide
+                        else UnitPrice
+                        end
+
+                    update #StockValuationResults set BalanceValue = BalanceQuantity * UnitPrice
+
+                    select * from #StockValuationResults
+                    
+                
+
+        INSERT INTO [Gardners].[dbo].[StockValue_thardata] 
+				(ProductID, TFID, Code, Description, Nominal, MaterialGroup, MaterialType, BalanceQuantity, PurchasePrice,
+                PurchaseUnits, WidthM, UnitDivide, UnitType, UnitPrice, BalanceValue, LastReceiptDate,ReportCreated
+                )
+        
+        (
+            select ProductID, TFID, Code, Description, Nominal, MaterialGroup, MaterialType, BalanceQuantity, PurchasePrice,
+                PurchaseUnits, WidthM, UnitDivide, UnitType, UnitPrice, BalanceValue, LastReceiptDate,ReportCreated
+             from #StockValuationResults
+
+        )
+
+        drop table #StockValuationResults
+
+    END
+GO
