@@ -1,0 +1,33 @@
+CREATE PROCEDURE [dbo].[PurchaseOrdersReport]
+AS
+BEGIN
+
+SELECT POH.[PurchaseOrder_Head_PurchaseOrderNo] as PO_Number
+      ,PDL.SystemDate as PO_Created
+      ,PDL.ReqDate as Required_Date
+      ,POD.PurchaseOrder_Detail_ProductID as Product_ID
+      ,POD.PurchaseOrder_Detail_PurchaseType as Purchase_Type
+      ,POD.PurchaseOrder_Detail_LineStatus as Order_Status
+      ,POD.PurchaseOrder_Detail_Code as Stock_Code
+      ,POD.PurchaseOrder_Detail_Description as Description
+      ,POD.PurchaseOrder_Detail_JobNo as Job_Number
+      ,POD.PurchaseOrder_Detail_PurchaseUnits as Purchase_Units
+      ,POD.PurchaseOrder_Detail_PurchaseUnitPrice as Purchase_Unit_Price
+      ,POD.PurchaseOrder_Detail_AccountsNominal as Accounts_Nominal
+      ,POD.PurchaseOrder_Detail_QuantityOrdered as Quantity_Ordered
+      ,POD.PurchaseOrder_Detail_QuantityDelivered as Quantity_Delivered
+      ,POD.PurchaseOrder_Detail_QuantityInvoiced as Quantity_Invoiced
+      ,POH.PurchaseOrder_Head_SupplierName as Supplier_Name
+      ,POD.PurchaseOrder_Detail_NettAmount as Nett_Value
+      ,POD.PurchaseOrder_Detail_VatAmount as Vat_Amount
+      ,POD.PurchaseOrder_Detail_GrossAmount as Gross_Amount
+      ,POD.PurchaseOrder_Detail_DeliveryAmount as Delivery_Nett_Amount
+      ,POD.PurchaseOrder_Detail_DeliveryVatAmount as Delivery_Vat_Amount
+      ,POD.PurchaseOrder_Detail_DeliveryGrossAmount as Delivery_Gross_Amount
+  FROM thardata.dbo.thar_MI_PurchaseOrder_Detail POD JOIN
+  thardata.dbo.PurchaseOrderLines PDL ON POD.PurchaseOrder_Detail_PurchaseOrderDetailID = PDL.ID JOIN
+  thardata.dbo.thar_MI_PurchaseOrder_Head AS POH on POD.PurchaseOrder_Detail_PurchaseOrderID = POH.PurchaseOrder_Head_PurchaseOrderID
+  WHERE POD.PurchaseOrder_Detail_LineStatus NOT IN('Complete','Cancelled')
+
+  END
+GO
