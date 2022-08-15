@@ -24,9 +24,9 @@ SELECT POH.[PurchaseOrder_Head_PurchaseOrderNo] as PO_Number
       ,POD.PurchaseOrder_Detail_DeliveryAmount as Delivery_Nett_Amount
       ,POD.PurchaseOrder_Detail_DeliveryVatAmount as Delivery_Vat_Amount
       ,POD.PurchaseOrder_Detail_DeliveryGrossAmount as Delivery_Gross_Amount
-  FROM thardata.dbo.thar_MI_PurchaseOrder_Detail POD JOIN
-  thardata.dbo.PurchaseOrderLines PDL ON POD.PurchaseOrder_Detail_PurchaseOrderDetailID = PDL.ID JOIN
-  thardata.dbo.thar_MI_PurchaseOrder_Head AS POH on POD.PurchaseOrder_Detail_PurchaseOrderID = POH.PurchaseOrder_Head_PurchaseOrderID
+  FROM database1.dbo.thar_MI_PurchaseOrder_Detail POD JOIN
+  database1.dbo.PurchaseOrderLines PDL ON POD.PurchaseOrder_Detail_PurchaseOrderDetailID = PDL.ID JOIN
+  database1.dbo.thar_MI_PurchaseOrder_Head AS POH on POD.PurchaseOrder_Detail_PurchaseOrderID = POH.PurchaseOrder_Head_PurchaseOrderID
   WHERE POD.PurchaseOrder_Detail_LineStatus NOT IN('Complete','Cancelled')
 
   END
