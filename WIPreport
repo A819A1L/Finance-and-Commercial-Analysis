@@ -9,7 +9,7 @@ BEGIN
                     [KeyAccount], [Estimator], [JobDesc], [ProductType], [JobDate], [JobCreated], [RequiredDate], [ReportCreated],
                     [EstPrintMatCost], [EstOtherMatCost], [EstOutworkCost], [EstCarriageCost], [EstPrintingLabCost], 
                     [EstPrintingOHCost], [TotalEstPrintingCost], [EstFinishingLabCost], [EstFinishingOHCost], [TotalEstFinishingCost]
-                from [Gardners].[dbo].[WIP_thardata] 
+                from [database2].[dbo].[WIP_thardata] 
 
 				where convert(date,ReportCreated) = convert(date,DATEADD(DD,-1,getdate()))
             
