@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[UpdateStockValueFromTharstern]
+CREATE PROCEDURE dbo.UpdateStockValueFromTharstern
 	
 AS
 BEGIN
@@ -26,8 +26,8 @@ BEGIN
                             ) as LastReceiptDate,
                         GetDate() as ReportCreated
                     into #StockValuationResults
-                    from thardata.dbo.TransactionFile tf
-                    join thardata.dbo.Product as p on tf.ProductID = p.ID
+                    from database1.dbo.TransactionFile tf
+                    join database1.dbo.Product as p on tf.ProductID = p.ID
                     where tf.Balance > 0
                     and tf.type in(3,1,9)
 
@@ -92,7 +92,7 @@ BEGIN
                     
                 
 
-        INSERT INTO [Gardners].[dbo].[StockValue_thardata] 
+        INSERT INTO database2.dbo.StockValue_thardata
 				(ProductID, TFID, Code, Description, Nominal, MaterialGroup, MaterialType, BalanceQuantity, PurchasePrice,
                 PurchaseUnits, WidthM, UnitDivide, UnitType, UnitPrice, BalanceValue, LastReceiptDate,ReportCreated
                 )
