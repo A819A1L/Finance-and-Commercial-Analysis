@@ -54,8 +54,8 @@ SELECT med.CustomerName as Customer_Name
       
 into #EstimatesReport
 
-  FROM thardata.dbo.MainEstimateDetails as med
-  LEFT JOIN thardata.dbo.MainJobDetails mjd on med.EstimateHeaderRef = mjd.EstimateHeaderRef
+  FROM database1.dbo.MainEstimateDetails as med
+  LEFT JOIN database1.dbo.MainJobDetails mjd on med.EstimateHeaderRef = mjd.EstimateHeaderRef
   WHERE med.EstimateDate >= DATEADD(day, -1, CAST(GETDATE() AS date))
   AND med.EstimateDate < CAST(GETDATE() AS date)
   AND med.Estimator NOT IN('Davies.A')
