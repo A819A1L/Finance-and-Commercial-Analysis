@@ -4,7 +4,7 @@ AS
 BEGIN	
     SET NOCOUNT ON;
 
-		INSERT INTO [Gardners].[dbo].[WIP_thardata] 
+		INSERT INTO [database2].[dbo].[WIP_thardata] 
 				(
                     [JobNo], [JobID], [InvoiceID], [EstimateNo], [InvoiceCustomerName], [QuantityOrdered], [QuantityProduced], 
                     [QuantityDelivered], [PriceQuoted], [MaterialWIP], [LabourWIP], [OutworkCarriageWIP], [SalesLead], [Team],
@@ -24,19 +24,19 @@ BEGIN
                 mjd.QuantityDelivered,
                 med.TotalTotal as PriceQuoted,
                 (SELECT sum(jt.WIPValue)
-                    FROM thardata.dbo.JobTotals jt
+                    FROM database1.dbo.JobTotals jt
                     WHERE mjd.JobNo = jt.JobNo
                     AND jt.TotalType IN (1,2,3)
                     AND jt.WIPValue <> 0
                     ) as MaterialWIP, 
                 (SELECT sum(jt.WIPValue)
-                    FROM thardata.dbo.JobTotals jt
+                    FROM database1.dbo.JobTotals jt
                     WHERE mjd.JobNo = jt.JobNo
                     AND jt.TotalType IN (6,7,8)
                     AND jt.WIPValue <> 0
                     ) as LabourWIP,
                 (SELECT sum(jt.WIPValue)
-                    FROM thardata.dbo.JobTotals jt
+                    FROM database1.dbo.JobTotals jt
                     WHERE mjd.JobNo = jt.JobNo
                     AND jt.TotalType IN (4,5)
                     AND jt.WIPValue <> 0
@@ -62,8 +62,8 @@ BEGIN
                 med.FinishingOHSubTotal as EstFinishingOHCost,
                 med.FinishingSubTotal as TotalEstFinishingCost
 
-            FROM thardata.dbo.MainJobDetails mjd
-            JOIN thardata.dbo.MainEstimateDetails med ON mjd.JobNo = med.jobcreated
+            FROM database1.dbo.MainJobDetails mjd
+            JOIN database1.dbo.MainEstimateDetails med ON mjd.JobNo = med.jobcreated
             WHERE mjd.JobCompleted = 0
             AND mjd.JobCancelled = 0
             AND mjd.InvoiceCompleted = 0
